@@ -1,0 +1,1387 @@
+﻿
+@{
+
+}
+
+@section css{
+
+}
+
+@section scripts{
+
+    <script type="module" src="~/View_JS/Controller/Admin/Main.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/Admin/Main.js")).ToString("yyyyMMddHHmmss")"></script>
+}
+
+
+<div id="MainDiv">
+
+    <div id="cpsCommunityDiv" class="card border-primary"
+         style="margin:10px;display:none;padding:10px;height:650px;"
+         v-show="show">
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tab-home" data-toggle="tab"
+                   href="#home" role="tab" aria-controls="home" aria-selected="true">
+                    基本訊息
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="tab-add" data-toggle="tab"
+                   href="#add_community" role="tab" aria-controls="add_community" aria-selected="false">
+                    新增停車場
+                </a>
+            </li>
+            <li class="nav-item" v-show="selectCommunity.select">
+                <a class="nav-link" id="tab-loc" data-toggle="tab"
+                   href="#com_loc" role="tab" aria-controls="com_loc" aria-selected="false">
+                    車位管理
+                </a>
+            </li>
+            @*<li class="nav-item" v-show="selectCommunity.select">
+                <a class="nav-link" id="tab-house" data-toggle="tab"
+                   href="#com_house" role="tab" aria-controls="com_house" aria-selected="false">
+                    社區住戶
+                </a>
+            </li>*@
+            <li class="nav-item" v-show="selectCommunity.select">
+                <a class="nav-link" id="tab-house" data-toggle="tab"
+                   href="#com_cp" role="tab" aria-controls="com_cp" aria-selected="false">
+                    車位充電樁
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active " id="home" role="tabpanel" aria-labelledby="tab-home"
+                 style="padding-top:10px;">
+
+                <div class="scroll-view-x">
+                    <div class="card border-secondary scroll-view-item" style="height:520px;width:500px;float:left;">
+                        <div class="card-header ">
+                            <div class="input-group w-50">
+                                <input type="text" class="form-control" placeholder="輸入場域名稱"
+                                       v-model="searchName">
+
+                                @*<div class="input-group-append ">
+                                        <button type="button" class="btn btn-danger" onclick="">清除</button>
+                                    </div>*@
+                            </div>
+
+                        </div>
+                        <div class="card-body grid-view-y-2" style="height:450px;">
+
+                            <div style="height:180px;"
+                                 class="card border-info"
+                                 v-for="item in findCommunity"
+                                 v-on:click="onSelectCommunity(item)"
+                                 v-bind:class="[selectCommunity?selectCommunity.Id==item.Id?'border-danger':'border-info':'border-info']">
+                                <div class="card-header bg-primary text-white text-center">
+                                    {{item.Name}}
+                                </div>
+                                <div class="card-body">
+                                    <div class="row" style="vertical-align:middle">
+                                        <span style="font-size:15px;">建立時間：{{item.cDate|dateFormat}}</span>
+                                    </div>
+                                    <div class="row" style="vertical-align:middle">
+                                        <span style="font-size:15px;">登入IP：{{item.LoginIP}}</span>
+                                    </div>
+                                    <div class="row" style="vertical-align:middle">
+                                        <span style="font-size:15px;">
+                                            狀態：
+                                            <span class="badge "
+                                                  v-bind:class="[item.beEnable?'badge-success':'badge-danger']"
+                                                  style="font-size:18px;">
+                                                {{item.beEnable?'開啟':'關閉'}}
+                                            </span>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scroll-view-item"
+                         style="margin-left:20px;height:500px;overflow-y:auto;"
+                         v-show="selectCommunity.select">
+
+                        <div class="card border-primary "
+                             style="width:350px;">
+                            <div class="card-body">
+                                <div class="">
+                                    <span style="vertical-align:middle">名稱</span>
+                                    <input type="text" class="form-control" placeholder="" aria-label=""
+                                           v-model="selectCommunity.Name" />
+
+                                </div>
+                                <div>
+                                    <span style="vertical-align:middle">密碼</span>
+                                    <div class="input-group" id="communityPwdGroup">
+
+                                        <input type="password" id=""
+                                               class="form-control pwd_input"
+                                               v-model="selectCommunity.Pwd" size="20" />
+
+                                        <div class="input-group-append">
+                                            <span class="input-group-text pwd_show" id="">
+                                                <i class="fa fa-eye pwd_eye" aria-hidden="true" id=""></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="">
+                                    <span style="vertical-align:middle">地址</span>
+                                    <input type="text" class="form-control" placeholder="" aria-label=""
+                                           v-model="selectCommunity.Address.Detail" />
+
+                                </div>
+                                <div class="">
+                                    <span style="vertical-align:middle">狀態</span>
+                                    <select class="form-control"
+                                            v-model="selectCommunity.beEnable"
+                                            style="width:50%">
+                                        <option value="true">開啟</option>
+                                        <option value="false">關閉</option>
+                                    </select>
+
+                                </div>
+                                <div class="">
+                                    <span style="vertical-align:middle;">銀行</span>
+
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">帳戶名稱</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="必填"
+                                               v-model="selectCommunity.Bank.Name" />
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">統一編號</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="必填"
+                                               v-model="selectCommunity.Bank.Serial" />
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">帳號</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="必填"
+                                               v-model="selectCommunity.Bank.Account">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">銀行代碼</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="必填"
+                                               v-model="selectCommunity.Bank.Code" />
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">分行代碼</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="必填"
+                                               v-model="selectCommunity.Bank.Sub">
+                                    </div>
+
+                                </div>
+
+                                <div class="" style="text-align:right;margin-top:5px;">
+                                    <button type="button" class="btn btn-danger"
+                                            v-on:click="onEditSelectCommunity()">
+                                        修改
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="scroll-view-item"
+                         style="width: 400px; margin-left: 30px;"
+                         v-show="selectCommunity.select">
+
+                        @*<div class="row mb-2">
+                            <button type="button" class="btn bg-primary text-white"
+                                    style="text-align:center;font-size:20px;"
+                                    v-on:click="addSelectMeter()">
+                                <i class="fa fa-plus" style="color:white;"></i>
+                                社區電表
+                                <span class="badge badge-light">{{selectCommunity.Meter.length}}</span>
+                            </button>
+                            <button type="button" class="btn btn-success ml-2"
+                                    v-on:click="onAddSelectMeter()">
+                                新增
+                            </button>
+                        </div>*@
+
+                        @*<div class="row card border-secondary w-100 "
+                             style="height:500px;overflow-y:auto;">
+
+                            <div class="card-body"
+                                 style="">
+
+                                <div class="card border-primary w-100 mb-2"
+                                     style=""
+                                     v-for="item in selectMeter">
+
+                                    <div class="card-body">
+                                        <button type="button" class="btn close mb-2"
+                                                v-on:click="onRemoveSelectMeter(item)">
+                                            <i class="fa fa-close"></i>
+                                        </button>
+
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">電號:</span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder=""
+                                                   v-model="item.PaySerial">
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">表號:</span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder=""
+                                                   v-model="item.MeterSerial">
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">名稱:</span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder=""
+                                                   v-model="item.Marker">
+                                        </div>
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">狀態:</span>
+                                            </div>
+                                            <select class="custom-select form-control"
+                                                    v-model="item.beEnable"
+                                                    style="width:50%">
+                                                <option value="true">開啟</option>
+                                                <option value="false">關閉</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="" v-if="!item.isNew" style="text-align:right;">
+                                            <button type="button" class="btn btn-success" v-on:click="showMeterDetail(item)">詳細</button>
+                                            <button type="button" class="btn btn-danger"
+                                                    v-on:click="onEditSelectMeter(item)">
+                                                修改
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>*@
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="add_community" role="tabpanel" aria-labelledby="tab-add"
+                 style="padding-top:10px;">
+
+                <div class="scroll-view-x">
+
+                    <div class="card border-primary scroll-view-item"
+                         style="width: 350px;">
+                        <div class="card-body">
+                            <div class="">
+                                <span style="vertical-align:middle">名稱</span>
+                                <input type="text" class="form-control" placeholder="" aria-label=""
+                                       v-model="newAddCommunity.Name">
+
+                            </div>
+                            <div>
+                                <span style="vertical-align:middle">密碼</span>
+                                <div class="input-group" id="newPwdGroup">
+
+                                    <input type="password" id=""
+                                           class="form-control pwd_input"
+                                           v-model="newAddCommunity.Pwd" size="20" />
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text pwd_show" id="">
+                                            <i class="fa fa-eye pwd_eye" aria-hidden="true" id=""></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="">
+                                <span style="vertical-align:middle">地址</span>
+                                <input type="text" class="form-control" placeholder="" aria-label=""
+                                       v-model="newAddCommunity.Address.Detail">
+
+                            </div>
+                            <div class="">
+                                <span style="vertical-align:middle">狀態</span>
+                                <select class="form-control"
+                                        v-model="newAddCommunity.beEnable"
+                                        style="width:50%">
+                                    <option value="true">開啟</option>
+                                    <option value="false">關閉</option>
+                                </select>
+
+                            </div>
+                            <div class="">
+                                <span style="vertical-align:middle;">銀行</span>
+
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">帳戶名稱</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="必填"
+                                           v-model="newAddCommunity.Bank.Name">
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">統一編號</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="必填"
+                                           v-model="newAddCommunity.Bank.Serial">
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">帳號</span>
+                                    </div>
+                                    <input type="number" class="form-control" placeholder="必填"
+                                           v-model="newAddCommunity.Bank.Account">
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">銀行代碼</span>
+                                    </div>
+                                    <input type="number" class="form-control" placeholder="必填"
+                                           v-model="newAddCommunity.Bank.Code">
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">分行代碼</span>
+                                    </div>
+                                    <input type="number" class="form-control" placeholder="必填"
+                                           v-model="newAddCommunity.Bank.Sub">
+                                </div>
+
+                            </div>
+
+                            <div class="" style="text-align:right;margin-top:5px;">
+                                <button type="button" class="btn btn-danger"
+                                        v-on:click="onAddNewConnunity()">
+                                    確定新增
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @*<div class="card border-secondary scroll-view-item "
+                         style="width:600px; margin-left:10px;">
+
+                        <button type="button" class="btn bg-primary text-white w-100"
+                                style="text-align:center;font-size:25px;"
+                                v-on:click="onAddNewMeter()">
+                            <i class="fa fa-plus" style="color:white;"></i>
+                            社區電表
+
+                            <span class="badge badge-light">{{newAddCommunity.Meter.length}}</span>
+                        </button>
+
+                        <div class="card-body scroll-view-x">
+
+                            <div class="card border-primary mr-3 scroll-view-item"
+                                 style="width:300px;"
+                                 v-for="item in newAddMeter">
+
+                                <div class="card-body">
+                                    <button type="button" class="btn close mb-3"
+                                            v-on:click="onRemoveNewMeter(item)">
+                                        <i class="fa fa-close"></i>
+                                    </button>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">電號</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder=""
+                                               v-model="item.PaySerial" />
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">表號</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder=""
+                                               v-model="item.MeterSerial">
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">名稱</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder=""
+                                               v-model="item.Marker">
+                                    </div>
+                                    <div class="">
+                                        <span style="vertical-align:middle">狀態</span>
+                                        <select class="form-control"
+                                                v-model="item.beEnable"
+                                                style="width:50%">
+                                            <option value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>*@
+
+                </div>
+
+            </div>
+
+            <div class="tab-pane fade" id="com_loc" role="tabpanel" aria-labelledby="tab-add"
+                 style="padding-top:10px;">
+
+                <div class="scroll-view-x">
+                    <div class="card border-secondary scroll-view-item"
+                         style="height: 520px; width: 650px; float: left;">
+                        <div class="card-header ">
+                            <div class="input-group w-50">
+                                <input type="text" class="form-control" placeholder="輸入車位序號"
+                                       v-model="searchLoc">
+                            </div>
+                        </div>
+
+                        <div class="card-body grid-view-y-2" style="height: 450px;">
+                            <div class="card border-info "
+                                 style="height:350px;"
+                                 v-for="item in findLoc">
+                                <div class="card-body">
+                                    <button type="button" class="btn close mb-2"
+                                            v-on:click="onRemoveSelectLoc(item)">
+                                        <i class="fa fa-close"></i>
+                                    </button>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">車位序號:</span>
+                                        </div>
+                                        <input type="text" class="form-control" v-model="item.SerNum">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">車位名稱:</span>
+                                        </div>
+                                        <input type="text" class="form-control" v-model="item.Info.Content">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">充電樁:</span>
+                                        </div>
+                                        <input type="text" class="form-control" v-model="item.CpSerial">
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text">性質:</label>
+                                        </div>
+                                        <select class="custom-select"
+                                                v-model="item.Role">
+                                            <option selected value="0">私有</option>
+                                            <option value="1">公有</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text">狀態:</label>
+                                        </div>
+                                        <select class="custom-select"
+                                                v-model="item.beEnable">
+                                            <option selected value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+                                   
+                                    <div style="text-align:right;">
+                                        <button type="button" class="btn btn-success text-white"
+                                                v-bind:class="[selectChargeConfig.LocationId==0?'btn-success':selectChargeConfig.LocationId==item.Id?'btn-warning':'btn-success']"
+                                                v-on:click="onSelectChargeConfig(item.Id)">
+                                            充電設定
+                                        </button>
+
+                                        <button type="button" class="btn btn-danger"
+                                                v-on:click="onEditLocation(item)">
+                                            修改
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card border-info scroll-view-item ml-3" style="width:300px;">
+                        <h2 class="card-header bg-info text-white">
+                            新增車位
+                        </h2>
+
+                        <div class="card-body">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">序號:</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder=""
+                                       v-model="newAddLoc.SerNum">
+                            </div>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">名稱:</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder=""
+                                       v-model="newAddLoc.Info.Content">
+                            </div>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">充電樁:</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder=""
+                                       v-model="newAddLoc.CpSerial">
+                            </div>
+
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">性質:</label>
+                                </div>
+                                <select class="custom-select"
+                                        v-model="newAddLoc.Role">
+                                    <option selected value="0">私有</option>
+                                    <option value="1">公有</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">車位狀態:</label>
+                                </div>
+                                <select class="custom-select"
+                                        v-model="newAddLoc.beEnable">
+                                    <option selected value="true">開啟</option>
+                                    <option value="false">關閉</option>
+                                </select>
+                            </div>
+
+                            <div style="text-align:right;">
+                                <button type="button" class="btn btn-danger" v-on:click="onAddNewLoc()">新增</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card border-warning scroll-view-item ml-3"
+                         style="width:300px;"
+                         v-show="selectChargeConfig.LocationId!=0">
+                        <h2 class="card-header bg-warning text-white">
+                            車位充電設定
+                        </h2>
+
+                        <div class="card-body">
+
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">價格:</span>
+                                </div>
+                                <input type="number" class="form-control" placeholder="請輸入價格"
+                                       v-model="selectChargeConfig.Price">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">/小時</span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">單位:</label>
+                                </div>
+                                <select class="custom-select"
+                                        v-model="selectChargeConfig.Unit">
+                                    <option selected value="0">台幣</option>
+                                    <option value="1">美元</option>
+                                    <option value="2">日圓</option>
+                                    <option value="3">人民幣</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">狀態:</label>
+                                </div>
+                                <select class="form-control" 
+                                        v-model="selectChargeConfig.beEnable">
+                                    <option selected value="true">開啟</option>
+                                    <option value="false">關閉</option>
+                                </select>
+                            </div>
+                            <div class="" style="text-align:right;">
+                                <button type="button" class="btn btn-danger"
+                                        v-on:click="onSetChargeConfig()">設定</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="com_house" role="tabpanel" aria-labelledby="tab-add"
+                 style="padding-top:10px;">
+                <div class="scroll-view-x">
+
+                    <div class="card border-secondary scroll-view-item"
+                         style="height: 550px; width: 650px;">
+                        <div class="card-header ">
+                            <div class="input-group w-50">
+                                <input type="text" class="form-control" placeholder="輸入住戶"
+                                       v-model="searchHouse">
+                            </div>
+                        </div>
+                        <div class="card-body grid-view-y-2" style="height:480px;">
+
+                            <div class="card border-warning" style="height:330px;">
+                                <h3 class="card-header bg-primary text-white">
+                                    加入住戶
+                                </h3>
+                                <div class="card-body">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">住戶:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="請輸入住戶"
+                                               v-model="newAddHouse.Name">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text">狀態:</label>
+                                        </div>
+                                        <select class="form-control" v-model="newAddHouse.beEnable">
+                                            <option selected value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <input type="text" id="newHouseLoc" class="form-control "
+                                               placeholder="請輸入車位編號">
+                                        <div class="input-group-append">
+                                            <button class="btn bg-success w-auto" type="button"
+                                                    v-on:click="onAddNewHouseLoc()">
+                                                <i class="fa fa-plus" style="color:white;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <select class="custom-select" id="newHouseLocSelect" style="width:50px;">
+                                            <option v-for="serNum in newAddHouse.Loc.items">{{serNum}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button class="btn bg-danger w-auto" type="button"
+                                                    v-on:click="onRemoveNewHouseLoc()">
+                                                <i class="fa fa-minus" style="color:white;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style="text-align:right;">
+                                        <button type="button" class="btn btn-success"
+                                                v-on:click="onAddNewHouse()">加入</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-primary" style="height:330px;"
+                                 v-for="house in findHouse">
+                                <div class="card-body">
+                                    <button type="button" class="btn close mb-2"
+                                            v-on:click="onRemoveHouse(house)">
+                                        <i class="fa fa-close"></i>
+                                    </button>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">住戶:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="請輸入住戶"
+                                               v-model="house.Name">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text">狀態:</label>
+                                        </div>
+                                        <select class="form-control" v-model="house.beEnable">
+                                            <option value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <input type="text" v-bind="{id:'addHouseLoc_'+house.Id}" class="form-control "
+                                               placeholder="請輸入車位編號">
+                                        <div class="input-group-append">
+                                            <button class="btn bg-success w-auto" type="button"
+                                                    v-on:click="onAddHouseLoc(house.Id)">
+                                                <i class="fa fa-plus" style="color:white;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-2">
+                                        <select class="custom-select" v-bind="{id:'houseLocSelect_'+house.Id}" style="width:50px;">
+                                            <option v-for="loc in house.Loc.items">{{loc.SerNum}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button class="btn bg-danger w-auto" type="button"
+                                                    v-on:click="onRemoveLoc(house.Id)">
+                                                <i class="fa fa-minus" style="color:white;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style="text-align:right;">
+                                        <button type="button" class="btn btn-danger"
+                                                v-on:click="onEditHouse(house)">
+                                            修改
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="com_cp" role="tabpanel" aria-labelledby="tab-add"
+                 style="padding-top:10px;">
+                <div class="scroll-view-x">
+
+                    <div class="card border-secondary scroll-view-item"
+                         style="height: 550px; width: 650px;">
+                        <div class="card-header ">
+                            <div class="input-group w-50">
+                                <input type="text" class="form-control" placeholder="充電樁序號"
+                                       v-model="searchCp">
+                            </div>
+                        </div>
+                        <div class="card-body grid-view-y-2" style="height:480px;">
+
+                            <div class="card border-info" style="height:330px">
+                                <h2 class="card-header text-white bg-info">
+                                    加入充電樁
+                                </h2>
+                                <div class="card-body">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">序號:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" 
+                                               v-model="newAddCp.Serial">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">備註:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" 
+                                               v-model="newAddCp.Remarker">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>狀態:</label>
+                                        <select class="form-control" v-model="newAddCp.beEnable">
+                                            <option selected value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+                                    <div style="text-align:right">
+                                        <button type="button" class="btn btn-success" 
+                                                v-on:click="onAddNewCp()">加入</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-primary" style="height:330px"
+                                 v-for="cp in findCp">
+                                <div class="card-body">
+                                    <button type="button" class="btn close mb-2"
+                                            v-on:click="onRemoveCp(cp)">
+                                        <i class="fa fa-close"></i>
+                                    </button>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">序號:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder=""
+                                               v-model="cp.Serial">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">備註:</span>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder=""
+                                               v-model="cp.Remarker">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>狀態:</label>
+                                        <select class="form-control" v-model="cp.beEnable">
+                                            <option selected value="true">開啟</option>
+                                            <option value="false">關閉</option>
+                                        </select>
+                                    </div>
+                                    <div style="text-align:right">
+                                        <button type="button" class="btn btn-danger"
+                                                v-on:click="onEditCp(cp)">
+                                            修改
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+
+    <div id="sysAccDiv"
+         style="display:none;"
+         v-show="show">
+        <div class="card border-primary" style="margin: 10px;">
+            <div class="card-header bg-primary text-white" style="text-align:left;font-size:30px;">
+                {{title}}
+            </div>
+
+            <div class="card-body">
+                <div class="row" style="display:block;padding-right:15px;text-align:right;margin-bottom:10px;">
+                    <button type="button" class="btn btn-danger" v-on:click="onAddNewAcc()">新增</button>
+                </div>
+
+                <table v-show="sysUser.length>0" class="table table-striped table-bordered col-lg-12">
+                    <thead is="sort-thead" :columns="tableColumns"
+                           :data-list="sysUser" v-on:filter-data="onUserSort"></thead>
+
+                    <tbody class="table table-striped table-bordered">
+                        <tr v-for=" item in filterData">
+                            <td>
+                                <span>{{ item.Id }}</span>
+                            </td>
+                            <td>
+                                <span>{{item.Account}}</span>
+                            </td>
+                            <td>
+                                <span>{{ item.Name }}</span>
+                            </td>
+                            <td>
+                                <span>{{ item.Group?item.Group.Title:'' }}</span>
+                            </td>
+                            <td>
+                                <span>{{ item.cDate|dateFormat }}</span>
+                            </td>
+                            <td>
+                                <button type="button"
+                                        v-show="item.Id!=1"
+                                        v-on:click="onEditUser(item)"
+                                        class="btn btn-primary">
+                                    編輯
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div v-show="filterData.length>0" style="align-content:center">
+                    <table-paginate :raw-data="sysUser" v-on:change-page="onChangePage"></table-paginate>
+                </div>
+
+            </div>
+        </div>
+        <div style="display:none;">
+            <div id="edit_acc_view" style="padding:10px;background:#ffffff;width:100%;">
+                <div class="card border-dark">
+                    <h2 class="card-header align-items-center">
+                        編輯使用者
+                        <button class="close btn btn-sm btn-dark"
+                                v-on:click="closeColorBox()">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </h2>
+
+                    <div class="card-body">
+                        <table class="table table-striped table-bordered col-xs-12">
+                            <tr>
+                                <td style="text-align:right;vertical-align:middle;">登入帳號：</td>
+                                <td>
+                                    <input type="text" class="form-control" readonly="readonly"
+                                           v-model="editUser.acc" size="50" maxlength="50" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>密碼：</td>
+                                <td>
+                                    <div class="input-group" id="sysAccountPwdGroup">
+                                        <input type="password" id="edit_loginPwd"
+                                               class="form-control pwd_input" v-model="editUser.pwd" size="20" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text pwd_show" id="see_pwd">
+                                                <i class="fa fa-eye pwd_eye" aria-hidden="true" id="icon_eye"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="text-danger" v-show="editUser.pwd===''">[密碼] 必填.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>使用者名稱：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="editUser.name" size="50" maxlength="50" />
+                                    <span class="text-danger" v-show="editUser.name===''">[使用者名稱] 必填.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>Phone：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="editUser.phone" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>Email：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="editUser.email" size="20" />
+                                    <span class="text-danger" v-show="!checkEditEmail">[電子郵件] 格式錯誤 </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>權限等級：</td>
+                                <td>
+                                    <select class="form-control" v-model="editUser.lv" style="width:50%">
+                                        <option v-for="item in sysGroup"
+                                                v-bind:value="item.Lv">
+                                            {{item.Title}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>狀態：</td>
+                                <td>
+                                    <select class="form-control" v-model="editUser.beEnable" style="width:30%">
+                                        <option value="true">啟用</option>
+                                        <option value="false">停用</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="row" style="display:block;text-align:center;padding:5px;">
+                            <button type="button" class="btn btn-danger"
+                                    style="margin-right:10px;"
+                                    v-on:click="startEditUser()">
+                                確定
+                            </button>
+
+                            <button type="button" class="btn btn-light"
+                                    v-on:click="closeColorBox()">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="add_acc_view" style="padding:10px;background:#ffffff;width:100%;">
+                <div class="card border-dark">
+                    <h2 class="card-header d-flex justify-content-between align-items-center">
+                        新增使用者
+                        <button class="close btn btn-sm btn-dark"
+                                v-on:click="closeColorBox()">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </h2>
+
+                    <div class="card-body">
+                        <table class="table table-striped table-bordered col-xs-12">
+                            <tr>
+                                <td style="text-align:right;vertical-align:middle;">登入帳號：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="newUser.acc" size="50" maxlength="50" />
+                                    <span class="text-danger" v-show="newUser.acc===''">[登入帳號] 必填.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>密碼：</td>
+                                <td>
+                                    <input type="password" class="form-control"
+                                           v-model="newUser.pwd" size="20" />
+                                    <span class="text-danger" v-show="newUser.pwd===''">[密碼] 必填.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>使用者名稱：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="newUser.name" size="50" maxlength="50" />
+                                    <span class="text-danger" v-show="newUser.name===''">[使用者名稱] 必填.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>Phone：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="newUser.phone" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>Email：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="newUser.email" size="20" />
+                                    <span class="text-danger" v-show="!checkAddEmail">[電子郵件] 格式錯誤 </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>權限等級：</td>
+                                <td>
+                                    <select class="form-control" v-model="newUser.lv" style="width:50%">
+                                        <option v-for="item in sysGroup"
+                                                v-bind:value="item.Lv">
+                                            {{item.Title}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="row" style="display:block;text-align:center;padding:5px;">
+                            <button type="button" class="btn btn-danger"
+                                    style="margin-right:10px;"
+                                    v-on:click="addNewUser()">
+                                加入
+                            </button>
+
+                            <button type="button" class="btn btn-light"
+                                    v-on:click="closeColorBox()">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sysGroupDiv" class="card border-primary"
+         style="margin:10px;display:none;padding:10px;"
+         v-show="show">
+        之後再做
+    </div>
+
+    <div id="sysMenuDiv" class="card border-primary"
+         style="margin:10px;display:none;padding:10px;"
+         v-show="show">
+
+        <div class="card-body auto_block">
+            @*<div class="row" style="display:block;text-align:center;">
+                    工具列
+                </div>*@
+
+            <table class="table">
+
+                <tbody class="table table-borderless" style="">
+                    <tr class="border-secondary">
+                        <td class="col-2">
+                            <div class="" style="width:220px;">
+                                <span class="badge  badge-primary"
+                                      style="font-size:25px;">側邊欄選項</span>
+                            </div>
+                        </td>
+
+                    </tr>
+                    <tr v-for="item in menuList(0)">
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn text-dark"
+                                        style="background: #81D8D0"
+                                        v-on:click="editMenu(item)">
+                                    <span class="badge  text-light"
+                                          v-bind:class="[item.beEnable?'badge-success':'badge-danger']">{{item.beEnable?'open':'close'}}</span>
+                                    {{item.Name}}
+                                </button>
+                                <button type="button" class="btn btn-danger"
+                                        v-on:click="onDeleteMenu(item)"
+                                        v-bind:disabled="item.Id|menuDel">
+                                    刪除
+                                </button>
+                            </div>
+                        </td>
+
+                        <td>
+                            <table class="table table-borderless">
+                                <tbody class="">
+                                    <tr>
+                                        <td class="col-3">
+                                            <div class="" style="width:220px;">
+                                                <span class="badge badge-primary"
+                                                      style="font-size:25px;">{{item.Name}}選項</span>
+
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    <tr v-for="sub1 in menuList(item.Id)">
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn text-dark"
+                                                        style="background: #81D8D0"
+                                                        v-on:click="editMenu(sub1)">
+                                                    <span class="badge text-light"
+                                                          v-bind:class="[sub1.beEnable?'badge-success':'badge-danger']">{{sub1.beEnable?'open':'close'}}</span>
+                                                    {{sub1.Name}}
+                                                </button>
+                                                <button type="button" class="btn btn-danger"
+                                                        v-on:click="onDeleteMenu(sub1)"
+                                                        v-bind:disabled="sub1.Id|menuDel">
+                                                    刪除
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <table class="table table-borderless">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="list-group" style="width:220px;">
+                                                                <span class="badge badge-primary"
+                                                                      style="font-size:25px;">{{sub1.Name}}選項</span>
+
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr v-for="sub2 in menuList(sub1.Id)">
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <button type="button" class="btn text-dark"
+                                                                        style="background: #81D8D0"
+                                                                        v-on:click="editMenu(sub2)">
+                                                                    <span class="badge text-light"
+                                                                          v-bind:class="[sub2.beEnable?'badge-success':'badge-danger']">{{sub2.beEnable?'open':'close'}}</span>
+                                                                    {{sub2.Name}}
+                                                                </button>
+                                                                <button type="button" class="btn btn-danger"
+                                                                        v-on:click="onDeleteMenu(sub2)"
+                                                                        v-bind:disabled="sub2.Id|menuDel">
+                                                                    刪除
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div>
+                                                                <button type="button" class="btn btn-success"
+                                                                        v-on:click="addMenu(sub1)">
+                                                                    新增選項
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <button type="button" class="btn btn-success"
+                                                        v-on:click="addMenu(item)">
+                                                    新增選項
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <div>
+                                <button type="button" class="btn btn-success"
+                                        v-on:click="addMenu()">
+                                    新增選項
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <div style="display:none;">
+            <div id="edit_menu_view" style="padding:10px;background:#ffffff;width:100%;">
+                <div class="card border-dark">
+                    <h2 class="card-header align-items-center">
+                        修改選項
+                        <button class="close btn btn-sm btn-dark"
+                                v-on:click="closeColorBox()">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </h2>
+                    <div class="card-body">
+                        <table class="table table-striped table-bordered col-xs-12">
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>父選項：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="selectMenu.Parent.Name" size="20" disabled />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>選項名稱：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="selectMenu.Name" size="20" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>排序：</td>
+                                <td>
+                                    <input type="number" class="form-control" min="0"
+                                           v-model="selectMenu.Sort" max="100" maxlength="3"
+                                           style="width:100px;" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>權限等級：</td>
+                                <td>
+                                    <select class="form-control" v-model="selectMenu.GroupLv" style="width:50%">
+                                        @*<option value="-1">none</option>*@
+                                        <option v-for="item in sysGroup"
+                                                v-bind:value="item.Lv">
+                                            {{item.Title}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>狀態：</td>
+                                <td>
+                                    <select class="form-control" v-model="selectMenu.beEnable" style="width:30%">
+                                        <option value="true">啟用</option>
+                                        <option value="false">停用</option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                        </table>
+                        <div class="row" style="display:block;text-align:center;padding:5px;">
+                            <button type="button" class="btn btn-danger"
+                                    style="margin-right:10px;"
+                                    v-on:click="onEditMenu()">
+                                確定
+                            </button>
+
+                            <button type="button" class="btn btn-light"
+                                    v-on:click="closeColorBox()">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="add_menu_view" style="padding:10px;background:#ffffff;width:100%;">
+                <div class="card border-dark">
+                    <h2 class="card-header align-items-center">
+                        新增選項
+                        <button class="close btn btn-sm btn-dark"
+                                v-on:click="closeColorBox()">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </h2>
+                    <div class="card-body">
+                        <table class="table table-striped table-bordered col-xs-12">
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>父選項：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="addNewMenu.Parent.Name" size="20" disabled />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>選項名稱：</td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                           v-model="addNewMenu.Name" size="20" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>排序：</td>
+                                <td>
+                                    <input type="number" class="form-control" min="0"
+                                           v-model="addNewMenu.Sort" max="100" maxlength="3"
+                                           style="width:100px;" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='text-align:right;vertical-align:middle;'>權限等級：</td>
+                                <td>
+                                    <select class="form-control" v-model="addNewMenu.GroupLv" style="width:50%">
+                                        @*<option value="-1">none</option>*@
+                                        <option v-for="item in sysGroup"
+                                                v-bind:value="item.Lv">
+                                            {{item.Title}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                        </table>
+                        <div class="row" style="display:block;text-align:center;padding:5px;">
+                            <button type="button" class="btn btn-danger"
+                                    style="margin-right:10px;"
+                                    v-on:click="onAddNewMenu()">
+                                加入
+                            </button>
+
+                            <button type="button" class="btn btn-light"
+                                    v-on:click="closeColorBox()">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

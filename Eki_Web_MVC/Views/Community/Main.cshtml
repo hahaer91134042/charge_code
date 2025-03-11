@@ -1,0 +1,160 @@
+﻿
+@{
+//Layout = "~/Views/Shared/Master_Community.cshtml";
+
+}
+
+@section css{
+
+}
+
+@section scripts{
+
+    <script type="module" src="~/View_JS/Controller/Community/Main.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/Community/Main.js")).ToString("yyyyMMddHHmmss")"></script>
+
+}
+
+
+<div class="main" id="MainDiv">
+
+    <nav class="navbar navbar-expand navbar-light navbar-bg" id="PageTop">
+
+        <a v-show="showSidebar" class="sidebar-toggle js-sidebar-toggle"
+           data-bs-toggle="collapse"
+           href="#sidebar"
+           role="button" aria-expanded="false" aria-controls="sidebar">
+            <i class="hamburger align-self-center"></i>
+        </a>
+
+        <div class="navbar-collapse collapse">
+            <h1 class="nav-title">{{title}}</h1>
+            <h3 class="state">總數:{{meterCount}}</h3>
+            <ul class="navbar-nav navbar-align">
+                <li class="nav-item dropdown">
+                    <a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown"
+                       data-bs-toggle="dropdown">
+                        <div class="position-relative">
+                            <i class="align-middle " data-feather="bell"></i>
+                            <span class="indicator" v-show="notifyCount>0">{{notifyCount}}</span>
+                        </div>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0"
+                         aria-labelledby="alertsDropdown">
+                        <div class="dropdown-menu-header">
+                            <span v-if="notifyCount>0">{{notifyCount}}則訊息</span>
+                            <span v-else=v-else>目前沒有訊息</span>
+                        </div>
+                        <div class="list-group" id="notifyDiv">
+
+                        </div>
+                        @*<div class="dropdown-menu-footer">
+                                <a href="#" class="text-muted">Show all notifications</a>
+                            </div>*@
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+                        <i class="align-middle" data-feather="settings"></i>
+                    </a>
+
+                    <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                        <img src="~/images/cps/icons/user.png" class="avatar img-fluid rounded me-1" alt="" />
+                        <span class="text-dark">{{name}}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="user"></i>帳務資訊</a>
+                        <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="dollar-sign"></i>修改密碼</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" onclick="logoutCps()">登出</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <main class="content" id="MeterDiv">
+        <div class="container-fluid p-0">
+
+            <div class="navbar-search">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search align-middle me-2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" class="form-control" id="topbarInputIconLeft" placeholder="搜尋電表編號" aria-label="Search" aria-describedby="topbar-addon">
+                </div>
+                <div class="chip">用戶充電費未繳:{{noPayOrder.length}}</div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6 col-xxl-3 d-flex"
+                     v-for="item in meterList">
+                    <div class="card flex-fill w-100" v-on:click="onMeterSelect(item)">
+                        <div class="card-header">
+                            <h2 class="card-title mb-0">{{item.Marker}}</h2>
+                            <h3 class="card-title mb-0">{{item.MeterSerial}}</h3>
+                        </div>
+                        <div class="card-body d-flex">
+                            <div class="align-self-center w-100">
+                                <img v-if="item.beEnable" src="~/images/cps/photos/charger.png" alt="" class="img-fluid charger-meter mb-2" width="120" height="120">
+                                <img v-else src="~/images/cps/photos/charger-unpaid.png" alt="" class="img-fluid charger-meter mb-2" width="120" height="120">
+                                <table class="table mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td>電號</td>
+                                            <td class="text-end">{{item.PaySerial}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>本月用電量</td>
+                                            <td class="text-end">{{item.calTotalWh()/1000.0}}度</td>
+                                        </tr>
+                                        <tr>
+                                            <td>本月總金額</td>
+                                            <td class="text-end">NT${{item.calTotalCost()}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>電表狀況</td>
+                                            <td class="text-end">{{item.beEnable?'開':'關'}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row text-muted">
+                <div class="col-6 text-start">
+                    <p class="mb-0">
+                        <a class="text-muted" href="" target="_blank"><strong>Blockcharge</strong></a> &copy;
+                    </p>
+                </div>
+                <div class="col-6 text-end">
+                    <ul class="list-inline">
+                        @*<li class="list-inline-item">
+                                <a class="text-muted" href="https://adminkit.io/" target="_blank">服務中心</a>
+                            </li>*@
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="" target="_blank">隱私權政策</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="" target="_blank">條款</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+
+
+

@@ -1,0 +1,38 @@
+﻿@model List<string>
+@{
+    //Log.d($"view body top data->{Model.toJsonString()}");
+}
+
+<div id="top">   
+    <div id="DivUserLogin">        
+        <div id="welcomeuser">            
+            <span id="ltName"></span> <span>您好!</span>
+            <span id="hidUserId" style="visibility:hidden;"></span>
+            <span id="hidUserAcc" style="visibility:hidden;"></span>
+        </div>
+        <div id="timenow">
+            登入時間：
+            <span id="ltTime"></span>
+        </div>
+    </div>
+    <div id="logut">
+        <input type="button" value="登出" onclick="location.href='@Url.Action("Logout", "Admin")'" />
+    </div>
+
+</div>
+<div id="tool">
+    <div id="path">
+        @*<span id="ltPath"></span>*@
+        導覽列：@for (int i = 0; i < Model.Count; i++)
+        {
+            if (i+1 < Model.Count)
+            {
+                <span>@Model[i] > </span>
+            }
+            else
+            {
+                <span>@Model[i]</span>
+            }
+        }
+    </div>
+</div>

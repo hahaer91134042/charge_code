@@ -1,0 +1,524 @@
+﻿@model object
+@{
+    //Log.d($"charge view data->{Model.toJsonString()}");
+}
+@section css{
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css">
+    <link href="~/Content/custom/component_style.css" rel="stylesheet" />
+}
+@section scripts{
+    <script src="~/lib/firebase/firebase-app.js"></script>
+    <script src="~/lib/firebase/firebase-firestore.js"></script>
+    <script src="~/lib/jquery-csv/jquery.csv.js"></script>
+    <script src="~/Scripts/plugin/jquery-numbercontrol.js"></script>
+    <script type="module" src="~/View_JS/Controller/OCS/Charge.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/OCS/Charge.js")).ToString("yyyyMMddHHmmss")"></script>
+}
+
+<div id="MainDiv" class="" style="width:100%;">
+
+    <div id="charge_status" class="col-xl-auto col-lg-auto col-md-auto col-sm-auto"
+         v-show="show"
+         style="height:auto;display:none;width:100%;padding-left:0px !important;padding-right:0px !important;">
+
+        <div v-if="status=='Available'" class="content" style="padding-top:20px;">
+            <h1>{{chargeTitle}}</h1>
+            <img src="~/images/ocs/充電槍插入.gif" />
+            <p><strong>若充電樁出現問題，煩請聯絡以下電話02 2704 1758</strong></p>
+        </div>
+        <div v-else class="content" style="padding-top:20px;">
+            <h1>{{chargeTitle}}</h1>
+            <div class="showcharge align-content-center">
+                <table width="100%">
+                    <tr>
+                        <td class="">
+                            <div style="">
+                                <span class="text-sm-center text-lg-center text-md-center"
+                                      style="font-weight:bold">
+                                    目前電量
+                                </span>
+                                <br />
+                                <font color="#7FBE26" style="font-weight:bold">{{chargeValue}}</font>
+                            </div>
+                        </td>
+                        <td class="">
+                            <div style="">
+                                <span class="text-sm-center text-lg-center text-md-center"
+                                      style="font-weight:bold">
+                                    經過時間
+                                </span>
+                                <br />
+                                <font color="#EF8200" style="font-weight:bold">{{chargeDuring}}</font>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+            <p>若不小心關掉頁面，請重掃Qr code，來回復頁面</p>            
+            <img v-bind:src="'/images/ocs/'+chargeImg" />
+            @*<img v-if="status=='Finishing'" src="~/images/ocs/充電完成.png" />
+            <img v-if="status=='Available'" src="~/images/ocs/充電槍插入.svg" />
+            <img v-else src="~/images/ocs/無法充電.png" />*@
+            <p><strong>若充電樁出現問題，煩請聯絡以下電話02 2704 1758</strong></p>
+        </div>
+
+
+        <footer style="width:100% !important;">
+            <p>聯絡我們</p>
+            <p>台北市信義路四段1-41號4樓</p>
+            <p>(02)2704-1758</p>
+            <p>support@ppyp.app</p>
+        </footer>
+    </div>
+
+    <div id="step_top" class="col-xl-10 col-lg-12 col-md-9"
+         v-show="show"
+         style="display: none; padding-left: 30px; padding-right: 30px;margin-top:20px;">
+        <view-data data=@Model.toJsonString().toBase64() v-on:init="initData"></view-data>
+
+        <i v-show="nowStep!=1"
+           class="fa fa-2x fa-chevron-left"
+           style="display:none;margin-bottom:20px;color:#cecece"
+           v-on:click="onBack()"></i>
+
+        <img v-show="nowStep==1" src="~/images/ocs/charge_step1.png" style="width:100%;" />
+        <img v-show="nowStep==2" src="~/images/ocs/charge_step2.png" style="width:100%; display:none;" />
+        <img v-show="nowStep==3" src="~/images/ocs/charge_step3.png" style="width: 100%; display: none;" />
+        <img v-show="nowStep==4" src="~/images/ocs/charge_step4.png" style="width: 100%; display: none;" />
+    </div>
+
+    <div id="charge_step1" class="col-xl-10 col-lg-12 col-md-9"
+         v-show="show"
+         style="height: auto; display: none;padding-left:30px;padding-right:30px;">
+
+        <div class="form-group mb-1" style="margin-top:20px;">
+            <label><span style="color:red">*</span><span style="color:black">手機號碼</span></label>
+            <input type="number" class="form-control rounded-pill border-2 border-dark"
+                   style="height:50px;"
+                   v-model="userPhone"
+                   placeholder="輸入手機號碼">
+        </div>
+        <div class="" v-show="showRegisterMsg" style="display:block;width:100%;text-align:right;padding-right:30px;">
+            <span style="color:red;">*</span>
+            <span style="color:black;">還沒有帳號嗎?  請先進行</span>
+            <button style="background-color:transparent;border:none;padding:0px;" v-on:click="onRegister()">
+                <span style="color: #b60707; font-size: 16px; font-weight: bold;">註冊</span>
+            </button>
+        </div>
+
+        <div style="margin-top:40px;">
+            <span class="mb-3"
+                  style="display:block;font-size:40px;color:black;text-align:center;font-weight:900;">
+                選擇充電方式
+            </span>
+
+            <div class="card mb-4"
+                 style="padding: 10px; border-radius: 0.75rem;"
+                 v-bind:style="chargeType==0?selectStyle:unSelectStyle"
+                 v-on:click="onSelectType(0)">
+                <span class="mb-2" style="font-weight:bold;color:black;font-size:15px;">
+                    以時間計價
+                </span>
+                <span style="color:rgb(104 104 104);">平均1分鐘{{chargeConfig.minPrice}}元</span>
+            </div>
+
+            <div class="card"
+                 style="padding: 10px; border-radius: 0.75rem;"
+                 v-bind:style="chargeType==1?selectStyle:unSelectStyle"
+                 v-on:click="onSelectType(1)">
+                <span class="mb-2" style="font-weight:bold;color:black;font-size:15px;">
+                    以度數計價
+                </span>
+                <span style="color:rgb(104 104 104);">平均1度電{{chargeConfig.degreePrice}}元</span>
+            </div>
+
+        </div>
+
+        <div style="margin-top:50px;">
+            <button type="button" class="btn rounded-pill"
+                    style="background: rgb(239 130 0);width:100%;height:50px;"
+                    v-on:click="onNext()">
+                <span style="display:block;color:white;font-size:20px;text-align:center;">下一步</span>
+            </button>
+            <span style="display:block;margin-Top:10px;color:black;text-align:center;">本充電槍規格 : 1小時7度電，32安培</span>
+        </div>
+
+    </div>
+
+    <div id="charge_step2" class="col-xl-10 col-lg-12 col-md-9"
+         v-show="show"
+         style="height: auto; display: none; padding-left: 30px; padding-right: 30px;">
+        <div>
+            <div style="display: block; margin-top: 70px; text-align: center;">
+                <span style="font-weight:bold;color:black;font-size:50px;">
+                    {{chargeType==0?'以時間計價':'以度數計價'}}
+                </span>
+            </div>
+
+            <table v-if="chargeType==0" width="100%"
+                   style="margin-top:60px;border-collapse:separate;border-spacing:0 1.5em;width:100%">
+                <tr class="">
+                    <td class="" width="20%" align="left">
+                        <img src="~/images/ocs/icon_ampere.png" style="height: 26px; width: 18px; margin-left: 10px;" />
+                    </td>
+                    <td class="" width="50%">
+                        <span style="color:black;font-size:16px;font-weight:bold;">充電電流</span>
+                    </td>
+                    <td class="" width="30%" align="right" style="padding:0px;">
+                        <span style="font-size:18px;color:black;padding:0px;">32A</span>
+                    </td>
+                </tr>
+                <tr style="margin-top:20px;">
+                    <td align="left">
+                        <img src="~/images/ocs/icon_time.png" style="height:24px;width:24px;margin-left:10px;" />
+                    </td>
+                    <td>
+                        <span style="color:black;font-size:16px;font-weight:bold;">
+                            <span style="color:red">*</span> 請輸入充電時間
+                        </span>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="" colspan="3" align="right" style="padding:0px;">
+                        <table>
+                            <tr style="">
+                                <td style="" align="right">
+                                    <input type="number" value="0" min="1"
+                                           readonly
+                                           class="numpicker form-control rounded-pill border-3 border-dark"
+                                           placeholder=""
+                                           v-model="chargeMin"
+                                           style="width:125px;">
+                                </td>
+                                <td align="right" style="vertical-align:bottom;padding:0px;">
+                                    <span style="color:black;font-size:15px;">
+                                        分
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="background:black;height:2px;"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="~/images/ocs/icon_money.svg" style="height:24px;width:24px;margin-left:10px;" />
+                    </td>
+                    <td>
+                        <span style="color:black;font-size:16px;font-weight:bold;">應付金額</span>
+                    </td>
+                    <td align="right">
+                        <span style="color:black;font-weight:bold;margin-right:10px;">{{payByMin}}</span>
+                    </td>
+                </tr>
+            </table>
+
+            <table v-else style="margin-top:40px;border-collapse:separate;border-spacing:0 1.5em;width:100%;">
+                <tr class="">
+                    <td class="col-1">
+                        <img src="~/images/ocs/icon_ampere.png" style="height:26px;width:18px;" />
+                    </td>
+                    <td class="col-7">
+                        <span style="color:black;font-size:16px;font-weight:bold;">充電電流</span>
+                    </td>
+                    <td class="col-7" align="right" style="padding:0px;">
+                        <span style="font-size:18px;color:black;">32A</span>
+                    </td>
+                </tr>
+                <tr style="margin-top:20px;">
+                    <td>
+                        <img src="~/images/ocs/icon_charge_socket.png" style="height:24px;width:24px;margin-left:10px;" />
+                    </td>
+                    <td>
+                        <span style="color:black;font-size:16px;font-weight:bold;">
+                            <span style="color:red">*</span> 請輸入充電度數
+                        </span>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="" colspan="3" align="right" style="padding:0px;">
+                        <table>
+                            <tr style="">
+                                <td style="" align="right">
+                                    <input type="number" value="0" min="1"
+                                           readonly
+                                           class="numpicker form-control rounded-pill border-3 border-dark"
+                                           placeholder=""
+                                           v-model="chargeDegree"
+                                           style="width:125px;">
+                                </td>
+                                <td align="right" style="vertical-align:bottom;padding:0px;">
+                                    <span style="color:black;font-size:15px;">
+                                        KWh
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="~/images/ocs/icon_time.png" style="height:24px;width:24px;margin-left:10px;" />
+                    </td>
+                    <td>
+                        <span style="color:black;font-size:16px;font-weight:bold;">
+                            預估充電時間
+                        </span>
+                    </td>
+                    <td align="right" style="">
+                        <span style="font-size:18px;color:black;">{{degreeTime}}分鐘</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="background:black;height:2px;"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="~/images/ocs/icon_money.svg" style="height:24px;width:24px;margin-left:10px;" />
+                    </td>
+                    <td>
+                        <span style="color:black;font-size:16px;font-weight:bold;">應付金額</span>
+                    </td>
+                    <td align="right">
+                        <span style="color:black;font-weight:bold;margin-right:10px;">{{payByDegree}}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="margin-top:70px;margin-bottom:50px;">
+            <button type="button" class="btn rounded-pill"
+                    style="background: rgb(239 130 0);width:100%;height:50px;"
+                    v-on:click="onNext()">
+                <span style="display:block;color:white;font-size:20px;text-align:center;">下一步</span>
+            </button>
+            <span style="display:block;margin-top:10px;color:black;text-align:center;">本充電槍規格 : 1小時7度電，32安培</span>
+        </div>
+
+
+    </div>
+
+    <div id="charge_step3" class="col-xl-10 col-lg-12 col-md-9"
+         v-show="show"
+         style="height: auto; display: none; padding-left: 30px; padding-right: 30px;">
+
+        <div style="display: block; margin-top: 70px; text-align: center;">
+            <span style="font-weight:bold;color:black;font-size:50px;">
+                付款方式
+            </span>
+        </div>
+
+        <div class="card" style="border-radius: 0.75rem;margin-top:60px;"
+             v-bind:style="userPayMethod==0?selectStyle:unSelectStyle"
+             v-on:click="onSelectPayMethod(0)">
+            <div class="card-body">
+                <span style="display:block;color:black;font-weight:bold;font-size:15px;">
+                    信用卡付款
+                </span>
+            </div>
+        </div>
+
+        <div class="card" style="border-radius: 0.75rem;margin-top:30px;"
+             v-bind:style="userPayMethod==1?selectStyle:unSelectStyle"
+             v-on:click="onSelectPayMethod(1)">
+            <div class="card-body">
+                <span style="display:block;color:black;font-weight:bold;font-size:15px;">
+                    LINEPay付款
+                </span>
+            </div>
+        </div>
+
+        <div style="margin-top:110px;margin-bottom:80px;">
+            <button type="button" class="btn rounded-pill mb-3"
+                    style="background: rgb(239 130 0);width:100%;height:50px;"
+                    v-on:click="onNext()">
+                <span style="display:block;color:white;font-size:20px;text-align:center;">下一步</span>
+            </button>
+            <span style="color:black;margin-left:10px;">
+                一旦付款成功，充電槍便開始計時，中途拔槍不予以退費
+            </span>
+        </div>
+    </div>
+
+    <div id="charge_step4" class="col-xl-10 col-lg-12 col-md-9"
+         v-show="show"
+         style="height: auto; display: none; padding-left: 30px; padding-right: 30px;">
+
+        <div style="display: block; margin-top: 70px; text-align: center;">
+            <span style="font-weight:bold;color:black;font-size:50px;">
+                發票方式
+            </span>
+        </div>
+
+
+        <div class="card"
+             style="border-radius: 0.75rem;margin-top:50px;padding:2px;"
+             v-bind:style="userInvoType==3||userInvoType==4||userInvoType==5?selectStyle:unSelectStyle">
+            <div class="card-header btn bg-white"
+                 v-on:click="onSelectInvo(0)"
+                 href="#invo_vehicle" role="button" aria-expanded="true"
+                 aria-controls="invo_vehicle">
+                <span style="display:block;color:black;font-weight:bold;font-size:17px;text-align:left">
+                    載具
+                </span>
+            </div>
+            <div id="invo_vehicle"
+                 class="card-body collapse show">
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                           v-model="userInvoType"
+                           name="vehicleRadios" id="radio_ezpay" value="5" checked>
+                    <label class="form-check-label" for="radio_ezpay"
+                           style="font-size:17px;color:black">
+                        會員載具
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                           v-model="userInvoType"
+                           name="vehicleRadios" id="radio_phone" value="3">
+                    <label class="form-check-label" for="radio_phone"
+                           style="font-size:17px;color:black">
+                        手機載具
+                    </label>
+                    <div class="row" style="padding-left:15px;">
+                        <span style="display:block;vertical-align:bottom;color:black;font-weight:bold;font-size:17px;">/</span>
+                        <input type="text" class="input_bottom_line"
+                               style="width:130px;vertical-align:bottom;margin-left:5px;"
+                               v-bind:disabled="userInvoType!=3"
+                               v-model="phoneVehicleNum"
+                               maxlength="7"
+                               id="phoneVehicleInput" placeholder="手機載具號碼">
+                    </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                           v-model="userInvoType"
+                           name="vehicleRadios" id="radio_cre" value="4">
+                    <label class="form-check-label" for="radio_cre"
+                           style="font-size:17px;color:black">
+                        自然人載具
+                    </label>
+                    <div class="row" style="padding-left:15px;">
+                        <input type="text" class="input_bottom_line"
+                               style="width:200px;vertical-align:bottom"
+                               v-bind:disabled="userInvoType!=4"
+                               v-model="cerVehicleNum"
+                               maxlength="16"
+                               id="cerVehicleInput" placeholder="自然人號碼">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card"
+             style="border-radius: 0.75rem;margin-top:20px;padding:2px;"
+             v-bind:style="userInvoType==2?selectStyle:unSelectStyle">
+            <div class="card-header btn bg-white"
+                 v-on:click="onSelectInvo(1)"
+                 href="#invo_ubn" role="button" aria-expanded="false"
+                 aria-controls="invo_ubn">
+                <span style="display:block;color:black;font-weight:bold;font-size:17px;text-align:left">
+                    統編
+                </span>
+            </div>
+            <div id="invo_ubn"
+                 class="card-body collapse">
+                <div>
+                    <input type="number" class="input_bottom_line"
+                           style="vertical-align:bottom;width:80%;"
+                           v-model="userUBN"
+                           maxlength="8"
+                           placeholder="請輸入統一編號">
+                </div>
+                <div class="mt-2">
+                    <input type="text" class="input_bottom_line"
+                           style="vertical-align:bottom;width:80%;"
+                           v-model="userName"
+                           placeholder="請輸入公司名稱">
+                </div>
+                <div class="mt-2">
+                    <input type="text" class="input_bottom_line"
+                           style="vertical-align:bottom;width:80%;"
+                           v-model="userAddress"
+                           placeholder="請輸入寄送地址">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card"
+             style="border-radius: 0.75rem;margin-top:20px;padding:2px;"
+             v-bind:style="userInvoType==1?selectStyle:unSelectStyle">
+            <div class="card-header btn bg-white"
+                 v-on:click="onSelectInvo(2)"
+                 href="#invo_donate" role="button" aria-expanded="false"
+                 aria-controls="invo_donate">
+                <span style="display:block;color:black;font-weight:bold;font-size:17px;text-align:left">
+                    捐贈
+                </span>
+            </div>
+            <div id="invo_donate"
+                 class="card-body collapse">
+                <input type="number" class="form-control"
+                       style="vertical-align:bottom;width:200px;"
+                       readonly
+                       v-model="userDonateCode"
+                       v-on:click="onOpenDonate()"
+                       placeholder="請選擇捐贈碼">
+
+
+            </div>
+        </div>
+
+
+        <div style="margin-top:110px;margin-bottom:50px;">
+            <button type="button" class="btn rounded-pill mb-3"
+                    style="background: rgb(239 130 0);width:100%;height:50px;"
+                    v-on:click="onCheckOut()">
+                <span style="display:block;color:white;font-size:20px;text-align:center;">
+                    進行結帳
+                </span>
+            </button>
+        </div>
+
+        <div style="display:none;">
+            <div id="donateDialog" class="card"
+                 style="padding-left:10px;padding-right:10px;padding-bottom:10px;padding-top:10px;">
+                <div class="card-header bg-white">
+                    <input class="input_border_none" style="width: 70%; height: 100%; font-size: 17px;color:black;"
+                           type="text"
+                           v-model="searchDonate"
+                           placeholder="搜尋捐款機關或團體" />
+                    <button class="close btn btn-sm btn-dark"
+                            v-on:click="closeColorBox()">
+                        <i class="fa fa-close"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="padding:0px !important;">
+                    <div v-for="item in filterDonate" v-bind:id="'donate_'+item[1]"
+                         style="background-color: white; border-bottom: 0.05rem solid #858796 !important;padding-top:10px;padding-bottom:10px;padding-left:5px;padding-right:5px;"
+                         v-on:click="onSelectDonateCode(item[1])">
+                        <span style="color:black;font-size:17px;">
+                            ({{item[1]}}){{item[0]}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+

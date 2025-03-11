@@ -1,0 +1,121 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>系統後台</title>
+    <meta name="keywords" content="" />
+    <meta name="author" content="EKI網繹數位科技" />
+    <meta name="copyright" content="EKI網繹數位科技" />
+    <meta name="robots" content="all" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="3 days" />
+    <meta name="rating" content="general" />
+    <meta name="description" content="" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @*<link rel="shortcut icon" href="/images/logoicon.ico" />*@
+    <link rel="shortcut icon" href="~/images/ppyp.ico" />
+
+    <link href="~/Content/custom/Login.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.6.0.min.js"></script>
+    <style type="text/css">
+        html {
+            /*background: #CCC url(images/bg00.jpg) no-repeat top center !important;*/
+            background: #CCC url('../../images/bg00.jpg') no-repeat top center !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="wrapper">
+        <div id="full_block">
+            <div id="login_box">
+                <b>
+                    <img src="~/images/logo_ppyp.png" style="width:160px;height:48px;" alt="Logo" />
+                </b>
+                <h4>網站管理系統</h4>
+                <div class="box_info">
+                    <form id="frmMain" method="post" action="/Admin/Login">
+                        <table width="100%" border="0">
+                            <tbody>
+                                <tr id="htmltrMsg" runat="server" visible="false">
+                                    <td colspan="2" class="red">
+
+                                        <span id="ltlMsg">@ViewBag.ErrorMsg</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th align="right" width="25%">連線IP：</th>
+                                    <td>
+                                        <span id="ltClientIP">@ViewBag.ip</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th align="right">帳號：</th>
+                                    <td>
+                                        <input type="text" id="Account" name="Account" class="t1" value="" maxlength="100" tabindex="1" onfocus="if(this.value=='輸入帳號') this.value=''" onblur="if(this.value=='') this.value='輸入帳號'" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th align="right">密碼：</th>
+                                    <td>
+                                        <input type="password" id="Password" name="Password" class="t1" maxlength="20" tabindex="2" onfocus="if(this.value=='xxxxxxxx') this.value=''" onblur="if(this.value=='') this.value='xxxxxxxx'" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th align="right">驗證碼：</th>
+                                    <td>
+
+                                        <input type="text" id="ValidateCode" name="ValidateCode" class="t2" value="" />
+                                        <img src="~/File/GetValidateCode" class="scode" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <td>
+                                        <input type="reset" value="清除重填" class="btn" />
+                                        <input type="button" value="確認登入" class="btn2" onclick="CheckForm();" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <p>Copyright ©@DateTime.Now.Year EKI網憶數位有限公司 All right Reserved.<br />建議適用瀏覽器為Google Chrome、IE8、Firefox 3 以上版本。</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript" language="javascript">
+
+    function CheckForm()
+    {
+        if ($("#Account").val().trim() == "" || $("#Account").val().trim() == "輸入帳號") {
+            alert("你尚未輸入帳號");
+            document.forms[0]['ma_uid'].focus();
+        } else if ($("#Password").val().trim() == "" || $("#Password").val().trim() == "xxxxxxxx") {
+            alert("你尚未輸入密碼");
+            document.forms[0]['ma_pwd'].focus();
+        } else if ($("#ValidateCode").val() == "") {
+            alert("你尚未輸入驗證碼");
+            document.forms[0]['ma_chk'].focus();
+        } else {
+            document.forms[0].submit();
+        }
+    }
+
+    //focus輸入框時按下enter=確認登入
+    $('input').keyup(function (e) {
+        if (e.keyCode == 13) {
+            CheckForm();
+        }
+    });
+
+
+</script>

@@ -1,0 +1,73 @@
+﻿
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    @*<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />*@
+    <meta charset="utf-8" />
+    <title>網站後台</title>
+    <meta name="keywords" content="" />
+    <meta name="author" content="網億數位科技" />
+    <meta name="copyright" content="網億數位科技" />
+    <meta name="robots" content="all" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="3 days" />
+    <meta name="rating" content="general" />
+    <meta name="description" content="" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @*<link rel="shortcut icon" href="/images/logoicon.ico" />*@
+    <link rel="shortcut icon" href="~/images/ppyp.ico" />
+
+
+    @Styles.Render("~/css/jquery")
+    @Styles.Render("~/css/bootstrap")
+    @Styles.Render("~/css/plugin")
+    @Styles.Render("~/css/custom")
+
+    <link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/lib/jQuery.mmenu/mmenu.css" rel="stylesheet" />
+
+
+    @RenderSection("css", required: false)
+
+
+</head>
+<body>
+
+
+    <div id="wrapper">
+        @{ Html.RenderAction("LeftMenu", "Admin"); }
+
+        <div id="main_block">
+            @{ Html.RenderAction("BodyTop", "Admin"); }
+
+            @RenderBody()
+        </div>
+
+        <div class="clear"></div>
+
+    </div>
+
+    <div id="toastDiv" class="position-fixed bottom-0 right-0 p-3 bg-transparent" style="z-index:99;right:0;bottom:0;">
+
+
+    </div>
+
+    @Scripts.Render("~/js/jquery")
+    @Scripts.Render("~/js/jqueryval")
+    @Scripts.Render("~/js/vue")
+    @Scripts.Render("~/js/bootstrap")
+    @Scripts.Render("~/js/plugin")
+
+    <script src="~/lib/jQuery.mmenu/mmenu.polyfills.js"></script>
+    <script src="~/lib/jQuery.mmenu/mmenu.js"></script>
+    <script src="~/View_JS/View/LeftMenu_Admin.js"></script>
+    <script src="~/View_JS/Controller/Shared/Master_Admin.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/Shared/Master_Admin.js")).ToString("yyyyMMddHHmmss")"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+
+

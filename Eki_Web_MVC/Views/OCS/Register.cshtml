@@ -1,0 +1,139 @@
+﻿
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <meta name="keywords" content="" />
+    <meta name="author" content="網億數位科技" />
+    <meta name="copyright" content="網億數位科技" />
+    <meta name="robots" content="all" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="3 days" />
+    <meta name="rating" content="general" />
+    <meta name="description" content="" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="~/images/cps/icons/icon-48x48.png" />
+
+    @Styles.Render("~/css/jquery")
+    @Styles.Render("~/css/bootstrap")
+    @Styles.Render("~/css/plugin")
+
+    <link href="~/Content/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
+
+    <link href="~/Content/sb-admin-2.css" rel="stylesheet" />
+
+
+
+</head>
+<body class="bg-gradient-primary" id="page-top">
+
+    <div id="login_box" class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block bg-register-image">
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">註冊</h1>
+                                    </div>
+                                    <form class="user">
+                                        <div class="form-group">
+                                            <input type="tel" 
+                                                   v-bind:disabled="validPhone"
+                                                   class="form-control form-control-user"
+                                                   placeholder="請輸入手機"
+                                                   aria-describedby=""
+                                                   style=""
+                                                   v-model="userPhone">
+                                        </div>
+
+                                        <div class="row form-group">
+                                            <input 
+                                                   type="text" class="form-control form-control-user"
+                                                   placeholder="請輸入驗證碼" 
+                                                   aria-describedby=""
+                                                   style="width:150px;margin-left:10px;"
+                                                   v-model="userCode">
+
+                                            <button v-show="!validPhone" class="btn text-white btn-user"
+                                                    style="margin-left:10px; height:45px;background:#ff6a00;"
+                                                    type="button"
+                                                    v-on:click="onCheckPhone()">
+                                                簡訊驗證
+                                            </button>
+                                            <button v-show="validPhone"                                                     
+                                                    class="btn text-white btn-user"
+                                                    style="display:none;margin-left:10px; height:45px;background:#14b000;"
+                                                    type="button"
+                                                    v-on:click="onRefreshCheck()">
+                                                重新驗證
+                                            </button>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user"
+                                                   id="userMail" aria-describedby=""
+                                                   v-model="userMail"
+                                                   placeholder="請輸入信箱">
+                                        </div>
+                                        <span style="color:red">{{errorMsg}}</span>
+
+                                        <button type="button" 
+                                                class="btn text-white btn-user btn-block mt-3" 
+                                                style="background:#ff6a00"
+                                                v-bind:disabled="!goRegister"
+                                                v-on:click="onRegisterUser()">
+                                            完成
+                                        </button>
+
+                                    </form>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="toastDiv" class="position-fixed bottom-0 right-0 p-3 bg-transparent" style="z-index:99;right:0;bottom:0;">
+
+    </div>
+    @Scripts.Render("~/js/jquery")
+    @Scripts.Render("~/js/jqueryval")
+    @Scripts.Render("~/js/vue")
+    @Scripts.Render("~/js/bootstrap")
+    @Scripts.Render("~/js/plugin")
+
+    <script src="~/Scripts/jquery.easing.min.js"></script>
+    <script src="~/Scripts/chart.js/Chart.min.js"></script>
+
+    <script type="module" src="~/View_JS/Controller/OCS/Register.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/OCS/Register.js")).ToString("yyyyMMddHHmmss")"></script>
+</body>
+</html>
+
+

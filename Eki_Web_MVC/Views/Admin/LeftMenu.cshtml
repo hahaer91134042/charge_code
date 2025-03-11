@@ -1,0 +1,209 @@
+﻿@model List<Eki_Web_MVC.MenuSession>
+@{
+    //Log.d($"leftMenu html->{Model.toJsonString()}");
+
+    var mainMenu = (from menu in Model
+
+                    select menu.Main);
+
+
+}
+
+
+<div id="left_block">
+    <div id="leftMenu" class="bg-dark" style="width:100%;height:100%;text-align:center;padding:20px 5px 20px 5px;">
+
+        @*<a href="#menu">
+                <i class="fa fa-assistive-listening-systems fa-3x"
+                   style="color:white;"></i>
+            </a>*@
+
+        @*@foreach (var menu in mainMenu)
+            {
+                <a href="#menu_@menu.Id">
+                    <i class="fa fa-list fa-3x"
+                       style="color:white;"></i>
+                </a>
+            }*@
+
+
+        @*<i class="fa fa-gears fa-3x"
+           style="width:100%;height:150px;color:white;"></i>*@
+
+        @foreach (var menu in Model)
+        {
+
+            <a class="menu-option-icon" onclick="openNav('sidenav_@menu.Main.Id')">
+                @if (menu.Main.Type == 1)
+                {
+                    <i class="fa fa-gear fa-3x" style="color:white;"></i>
+                }
+                else
+                {
+                    <i class="fa fa-list fa-3x" style="color:white;"></i>
+                }
+            </a>
+
+
+            <div id="sidenav_@menu.Main.Id" class="sidenav">
+                <a href="javascript:void(0)" class="closebtn" onclick="closeNav('sidenav_@menu.Main.Id')">&times;</a>
+
+                @foreach (var sub1 in menu.Sub)
+                {
+                    if (sub1.Sub.Count < 1)
+                    {
+                        <a class="menu-link"  value="@sub1.Main.Id" >@sub1.Main.Name</a>
+                    }
+                    else
+                    {
+                        <span class="menu_title">@sub1.Main.Name</span>
+                        <ul>
+                            @foreach (var sub2 in sub1.Sub)
+                            {
+                                <li><a class="menu-link"  value="@sub2.Main.Id"  >@sub2.Main.Name</a></li>
+                            }
+                        </ul>
+                    }
+                }
+
+            </div>
+
+        }
+
+
+    </div>
+
+</div>
+
+
+
+@*
+
+        @foreach (var menu in Model)
+    {
+        <nav id="menu_@menu.Main.Id">
+            <div id="panel-menu">
+                <ul>
+                    @foreach (var sub1 in menu.Sub)
+                    {
+                        <li>
+                            <span class="">@sub1.Main.Name</span>
+                            <ul>
+                                @foreach (var sub2 in sub1.Sub)
+                                {
+                                    <li><a href="/Menu/@sub2.Main.Name">@sub2.Main.Name</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    }
+
+*@
+
+
+@*
+
+    @foreach (var menu in mainMenu)
+    {
+        <script>
+            new Mmenu(
+                document.querySelector('#menu_@menu.Id'),
+                {
+                    extensions: ['theme-dark'],
+                    setSelected: true,
+                    counters: true,
+                    columns: true,
+                    dropdown: {
+                        drop: true,
+                        event: 'hover click'
+                    },
+                    //searchfield: {
+                    //    placeholder: 'Search menu items',
+                    //},
+                    //iconbar: {
+                    //    use: '(min-width: 450px)',
+                    //    top: [
+                    //        '<a href="#/"><span class="fa fa-home"></span></a>',
+                    //    ],
+                    //    bottom: [
+                    //        '<a href="#/"><span class="fa fa-twitter"></span></a>',
+                    //        '<a href="#/"><span class="fa fa-facebook"></span></a>',
+                    //        '<a href="#/"><span class="fa fa-youtube"></span></a>',
+                    //    ],
+                    //},
+                    //sidebar: {
+                    //    collapsed: {
+                    //        use: false,
+                    //        hideNavbar: false,
+                    //    },
+                    //    expanded: {
+                    //        use: '(min-width: 230px)',
+                    //        initial:'remember'
+                    //    },
+                    //},
+                    //navbar: {
+                    //    title:""
+                    //},
+                    navbars: [
+                        {
+                            position: 'top',
+                            content: [
+                                `<div id="logo"><a href="/Home/Main">LOGO</a></div>`
+                            ]
+                        },
+                        {
+                            use: false,
+                            content: ['title'],
+                        },
+                        {
+                            content: ['searchfield'],
+                        },
+                        //{
+                        //    type: 'tabs',
+                        //    content: [
+                        //        '<a href="#panel-menu"><i class="fa fa-bars"></i> <span>Menu</span></a>',
+                        //        '<a href="#panel-account"><i class="fa fa-user"></i> <span>Account</span></a>',
+                        //        '<a href="#panel-cart"><i class="fa fa-shopping-cart"></i> <span>Cart</span></a>',
+                        //    ],
+                        //},
+                        {
+                            content: ['prev', 'breadcrumbs', 'close'],
+                        },
+                        {
+                            position: 'bottom',
+                            content: [
+                                `<div id="menu_footer">Copyright ©${moment().year()} EKI All right Reserved.Designed by  <a href="http://www.eki.com.tw/tc/index.html" target="_blank">EKI</a></div>`,
+                            ],
+                        },
+                    ],
+                },
+                {
+                    //searchfield: {
+                    //    clear: true,
+                    //},
+                    navbars: {
+                        breadcrumbs: {
+                            removeFirst: true,
+                        },
+                    },
+                    dropdown: {
+
+                        width: {
+                            max: 750
+                        },
+                        offset: {
+
+                            button: {
+                                x: 5
+                            }
+                        }
+                    },
+                }
+            );
+        </script>
+    }
+
+*@

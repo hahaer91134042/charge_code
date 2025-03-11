@@ -1,0 +1,207 @@
+﻿@model object
+
+@{
+    //ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/Master_Empty.cshtml";
+
+    //Log.d($"meter datail->{Model.toJsonString()}");
+}
+
+@section scripts{
+    <script type="module" src="~/View_JS/Controller/Meter/Detail.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/Meter/Detail.js")).ToString("yyyyMMddHHmmss")"></script>
+
+}
+
+<div class="card border-secondary bg-white m-1" id="MeterDiv" style="padding:10px;">
+    <view-data data=@Model.toJsonString().toBase64() v-on:init="initData"></view-data>
+
+    <div class="scroll-view-x">
+        <div class="card border-primary scroll-view-item" style="width:350px;">
+            <h2 class="card-header bg-primary text-white">
+                社區:{{community.Name}}  電表
+            </h2>
+            <div class="card-body">
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">電號:</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="" v-model="meter.PaySerial">
+                </div>
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">表號:</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="" v-model="meter.MeterSerial">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-info scroll-view-item ml-2" >
+            <h2 class="card-header text-white bg-info">
+                加入充電樁
+            </h2>
+            <div class="card-body">
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">序號:</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="" v-model="newAddCp.Serial">
+                </div>
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">備註:</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="" v-model="newAddCp.Remarker">
+                </div>
+                <div class="form-group">
+                    <label>狀態:</label>
+                    <select class="form-control" v-model="newAddCp.beEnable">
+                        <option selected value="true">開啟</option>
+                        <option value="false">關閉</option>
+                    </select>
+                </div>
+                <div style="text-align:right">
+                    <button type="button" class="btn btn-danger" v-on:click="onAddNewCp()">加入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-view-x mt-2" >
+        <div class="card border-info scroll-view-item" style="width: 600px; height: 600px;">
+            <div class="card-header">
+                <div class="input-group w-50">
+                    <input type="text" class="form-control" placeholder="請輸入充電樁序號" 
+                           v-model="searchCp">
+                </div>
+            </div>
+
+            <div class="card-body grid-view-y-2" style="height:510px;">
+
+                <div class="card border-primary" style="height:280px;"
+                     v-for="item in findCp"
+                     v-on:click="onSelectCp(item)"
+                     v-bind:class="[selectCp?selectCp.Id==item.Id?'border-danger':'border-primary':'border-primary']">
+
+                    <div class="card-body">
+                        <button type="button" class="btn close mb-2"
+                                v-on:click="onRemoveCp(item)">
+                            <i class="fa fa-close"></i>
+                        </button>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">序號:</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="" v-model="item.Serial">
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">備註:</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="" v-model="item.Remarker">
+                        </div>
+                        <div class="form-group">
+                            <label>狀態:</label>
+                            <select class="form-control" v-model="item.beEnable">
+                                <option selected value="true">開啟</option>
+                                <option value="false">關閉</option>
+                            </select>
+                        </div>
+                        <div style="text-align:right;">
+                            <button type="button" class="btn btn-danger" v-on:click="onEditCp(item)">修改</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <div class="card border-info ml-2 scroll-view-item" style="width:700px;height:600px;display:none;"
+             v-show="selectCp!=null">
+            <div class="card-header">
+                <div class="input-group w-50">
+                    <input type="text" class="form-control" placeholder="請輸入卡號" v-model="searchAuth">
+                </div>
+            </div>
+            <div class="card-body grid-view-y-2" style="height:510px;">
+
+                <div class="card border-warning" style="height:300px;">
+                    <h3 class="card-header bg-primary text-white">
+                        新增卡片
+                    </h3>
+                    <div class="card-body">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">充電樁:</span>
+                            </div>
+                            <input type="text" class="form-control" readonly
+                                   v-model="newAddAuth.CpSerial">
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">卡號:</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="請輸入卡號"
+                                   v-model="newAddAuth.Auth">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label>狀態</label>
+                            <select class="form-control" v-model="newAddAuth.beEnable">
+                                <option selected value="true">開啟</option>
+                                <option value="false">關閉</option>
+                            </select>
+                        </div>
+                        <div class="" style="text-align:right">
+                            <button type="button" class="btn btn-success" v-on:click="onAddNewAuth()">新增</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-primary"
+                     style="height:300px;"
+                     v-for="item in findAuth">
+
+                    <div class="card-body">
+                        <button type="button" class="btn close mb-2"
+                                v-on:click="onRemoveAuth(item)">
+                            <i class="fa fa-close"></i>
+                        </button>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">充電樁:</span>
+                            </div>
+                            <input type="text" class="form-control" readonly v-model="item.CpSerial">
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">卡號:</span>
+                            </div>
+                            <input type="text" class="form-control" readonly placeholder="" v-model="item.Auth">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label>狀態</label>
+                            <select class="form-control" v-model="item.beEnable">
+                                <option value="true">開啟</option>
+                                <option value="false">關閉</option>
+                            </select>
+                        </div>
+                        <div class="" style="text-align:right">
+                            <button type="button" class="btn btn-danger" v-on:click="onEditAuth(item)">修改</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+

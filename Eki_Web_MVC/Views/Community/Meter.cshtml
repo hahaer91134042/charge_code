@@ -1,0 +1,208 @@
+﻿
+@{
+
+}
+
+@section css{
+
+}
+
+@section scripts{
+    <script src="~/lib/firebase/firebase-app.js"></script>
+    <script src="~/lib/firebase/firebase-firestore.js"></script>
+    <script type="module" src="~/View_JS/Controller/Community/MainMeter.js?s=@File.GetLastWriteTimeUtc(Server.MapPath("~/View_JS/Controller/Community/MainMeter.js")).ToString("yyyyMMddHHmmss")"></script>
+
+}
+
+<nav id="sidebar" class="sidebar collapse show">
+    <div class="sidebar-content ">
+
+        <a v-show="root" class="sidebar-brand" v-on:click="closePage()">
+            <span class="align-middle">{{root.name}}</span>
+        </a>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-header sidebar-item">
+                <a class="sidebar-link" >電表</a>
+            </li>
+            <li class="sidebar-item" id="meterReport" 
+                v-on:click="selectItem({name:'電表報表',id:'meterReport'})">
+                <a class="sidebar-link" >
+                    <i class="align-middle" data-feather="bar-chart-2"></i> 
+                    <span class="align-middle">電表報表</span>
+                </a>
+            </li>
+            <li class="sidebar-item active" id="cpMonitor"
+                v-on:click="selectItem({name:'充電樁監控',id:'cpMonitor'})">
+                <a class="sidebar-link" >
+                    <i class="align-middle" data-feather="sliders"></i> 
+                    <span class="align-middle">充電樁監控</span>
+                </a>
+            </li>
+            <li class="sidebar-item" id="cpReport"
+                v-on:click="selectItem({name:'充電樁報表',id:'cpReport'})">
+                <a class="sidebar-link" >
+                    <i class="align-middle" data-feather="bar-chart-2"></i> 
+                    <span class="align-middle">充電樁報表</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+</nav>
+
+<div class="main" id="MainDiv">
+
+
+    <nav class="navbar navbar-expand navbar-light navbar-bg"
+         id="PageTop">
+
+        <a v-show="showSidebar" class="sidebar-toggle js-sidebar-toggle"
+           data-bs-toggle="collapse"
+           href="#sidebar"
+           role="button" aria-expanded="false" aria-controls="sidebar">
+            <i class="hamburger align-self-center"></i>
+        </a>
+
+        <div class="navbar-collapse collapse">
+            <h1 class="nav-title">{{title}}</h1>
+            <h3 class="state">總數:{{cpCount>0?cpCount:'-'}}</h3>
+            <ul class="navbar-nav navbar-align">
+                <li class="nav-item dropdown">
+                    <a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown"
+                       data-bs-toggle="dropdown">
+                        <div class="position-relative">
+                            <i class="align-middle " data-feather="bell"></i>
+                            <span class="indicator" v-show="notifyCount>0">{{notifyCount}}</span>
+                        </div>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0"
+                         aria-labelledby="alertsDropdown">
+                        <div class="dropdown-menu-header">
+                            <span v-if="notifyCount>0">{{notifyCount}}則訊息</span>
+                            <span v-else=v-else>目前沒有訊息</span>
+                        </div>
+                        <div class="list-group" id="notifyDiv">
+
+                        </div>
+                        @*<div class="dropdown-menu-footer">
+                                <a href="#" class="text-muted">Show all notifications</a>
+                            </div>*@
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+                        <i class="align-middle" data-feather="settings"></i>
+                    </a>
+
+                    <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                        <img src="~/images/cps/icons/user.png" class="avatar img-fluid rounded me-1" alt="" />
+                        <span class="text-dark">{{name}}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="user"></i>帳務資訊</a>
+                        <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="dollar-sign"></i>修改密碼</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" onclick="logoutCps()">登出</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+
+
+        <div v-show="show" class="container-fluid p-0" id="cpMonitorDiv">
+            <div class="navbar-search">
+                <div class="input-group">
+                    <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                                data-toggle="dropdown" 
+                                aria-haspopup="true" aria-expanded="true">車位編號</button>
+                        
+                    </div>
+                </div>
+                <div class="chip">停權用戶:-</div>
+                <div class="state">充電中:{{cpChargingCount>0?cpChargingCount:'-'}} 待機中:{{cpAvailableCount>0?cpAvailableCount:'-'}} 離線:{{cpUnavailableCount>0?cpUnavailableCount:'-'}}  </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6 col-xxl-3 d-flex" v-for="item in meterCpList.items">
+                    <div class="card flex-fill w-100">
+                        <div class="card-header">
+                            <h2 class="card-title mb-0">{{item.Loc.SerNum}}</h2>
+                        </div>
+                        <div class="card-body d-flex">
+                            <div class="align-self-center w-100">
+                                <img v-bind:src="'/images/cps/photos/'+item.Img" alt="" class="img-fluid charger-meter mb-2" width="120" height="120">
+                                <table class="table mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td>住戶編號</td>
+                                            <td class="text-end">{{item.House.Name}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>住戶狀態</td>
+                                            <td class="text-end">
+                                                <div class="flipswitch">
+                                                    <input type="checkbox" name="flipswitch"
+                                                           class="flipswitch-cb" id="fs"
+                                                           v-bind:checked="item.House.beEnable"
+                                                           v-on:change="onHouseStatus(item)">
+                                                    <label class="flipswitch-label" for="fs">
+                                                        <div class="flipswitch-inner"></div>
+                                                        <div class="flipswitch-switch"></div>
+                                                    </label>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+        </div>
+    
+    
+    </main>
+
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row text-muted">
+                <div class="col-6 text-start">
+                    <p class="mb-0">
+                        <a class="text-muted" href="" target="_blank"><strong>Blockcharge</strong></a> &copy;
+                    </p>
+                </div>
+                <div class="col-6 text-end">
+                    <ul class="list-inline">
+                        @*<li class="list-inline-item">
+                                <a class="text-muted" href="https://adminkit.io/" target="_blank">服務中心</a>
+                            </li>*@
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="" target="_blank">隱私權政策</a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="text-muted" href="" target="_blank">條款</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+
